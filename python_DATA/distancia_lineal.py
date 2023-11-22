@@ -4,9 +4,13 @@ from geopy.distance import geodesic
 import folium
 from folium import plugins
 import webbrowser
+import os
 
 # Crear Objeto Nominatim
 geolocator = Nominatim(user_agent="AppMap", timeout=10)
+
+# Obtener la ruta del script actual
+current_path = os.path.dirname(os.path.abspath(__file__))
 
 # Definir el diseño de la interfaz
 layout = [
@@ -47,6 +51,13 @@ while True:
 
     if event == 'Mapa':
         try:
+            # Crear la carpeta "mapa_html" si no existe
+            folder_path = os.path.join(current_path, 'mapa_html')
+            os.makedirs(folder_path, exist_ok=True)
+
+            # Ruta del archivo HTML en la carpeta "mapa_html"
+            map_file_path = os.path.join(folder_path, 'mapa_distancia.html')
+
             coord = [[origen.latitude, origen.longitude], [destino.latitude, destino.longitude]]
             lat_prom = (origen.latitude + destino.latitude) / 2
             long_prom = (origen.longitude + destino.longitude) / 2
@@ -56,8 +67,12 @@ while True:
             my_PolyLine = folium.PolyLine(locations=coord, weight=5)
             mapa.add_child(my_PolyLine)
             mapa.add_child(minimap)
-            mapa.save('mapa_de_distancia.html')
-            webbrowser.open('mapa_de_distancia.html')
+
+            # Guardar el mapa en la carpeta "mapa_html"
+            mapa.save(map_file_path)
+
+            # Abrir el mapa desde la carpeta "mapa_html"
+            webbrowser.open(map_file_path)
 
         except Exception as excep:
             window['-OUTPUT-'].update(f'Error: {str(excep)}')
